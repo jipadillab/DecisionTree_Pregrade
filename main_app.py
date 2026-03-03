@@ -988,8 +988,9 @@ def show_boosting():
         X_tr, X_te, y_tr, y_te = train_test_split(X_gb, y_gb, test_size=0.3, random_state=42, stratify=y_gb)
         gb_m = GradientBoostingClassifier(n_estimators=gb_n, learning_rate=gb_lr,
                                            max_depth=gb_d, subsample=gb_sub, random_state=42).fit(X_tr, y_tr)
-        staged_tr = list(gb_m.staged_score(X_tr, y_tr))
-        staged_te = list(gb_m.staged_score(X_te, y_te))
+        # staged_score was removed in sklearn ≥ 1.4 — compute manually via staged_predict
+        staged_tr = [accuracy_score(y_tr, yp) for yp in gb_m.staged_predict(X_tr)]
+        staged_te = [accuracy_score(y_te, yp) for yp in gb_m.staged_predict(X_te)]
         best_it   = int(np.argmax(staged_te))
 
         with c2:
